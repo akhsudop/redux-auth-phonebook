@@ -8,11 +8,19 @@ import { fetchContacts } from 'redux/operations';
 export const App = () => {
   const contacts = useSelector(state => state.contacts.data);
   const filter = useSelector(state => state.filter);
+  const loading = useSelector(state => state.contacts.isLoading);
+  const error = useSelector(state => state.contacts.error);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchContacts(filter));
-  }, [filter, dispatch]);
+    dispatch(fetchContacts());
+  }, [dispatch]);
+
+  const getVisibleContacts = () => {
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filter.toLowerCase())
+    );
+  };
 
   return (
     <>
@@ -20,7 +28,8 @@ export const App = () => {
       <ContactForm />
       <h3>Contacts:</h3>
       <Filter />
-      <ContactsList myContacts={contacts} />
+      {loading && !error && <b>In progress...</b>}
+      <ContactsList myContacts={getVisibleContacts()} />
     </>
   );
 };
