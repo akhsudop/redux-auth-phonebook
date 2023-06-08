@@ -1,17 +1,18 @@
 import { ContactForm } from './ContactForm/ContactForm';
 import { Filter } from './Filter/Filter';
 import { ContactsList } from './ContactList/ContactsList';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { fetchContacts } from 'redux/operations';
 
 export const App = () => {
-  const contacts = useSelector(state => state.contacts);
+  const contacts = useSelector(state => state.contacts.data);
   const filter = useSelector(state => state.filter);
+  const dispatch = useDispatch();
 
-  const getVisibleContacts = () => {
-    return contacts.filter(contact =>
-      contact.name.toLowerCase().includes(filter.toLowerCase())
-    );
-  };
+  useEffect(() => {
+    dispatch(fetchContacts(filter));
+  }, [filter, dispatch]);
 
   return (
     <>
@@ -19,7 +20,7 @@ export const App = () => {
       <ContactForm />
       <h3>Contacts:</h3>
       <Filter />
-      <ContactsList myContacts={getVisibleContacts()} />
+      <ContactsList myContacts={contacts} />
     </>
   );
 };

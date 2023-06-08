@@ -1,37 +1,45 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { nanoid } from 'nanoid';
-const CONTACTS_STORAGE_KEY = 'phonebook-contacts';
+import { addContact, deleteContact, fetchContacts } from './operations';
 
-const initialContacts =
-  JSON.parse(localStorage.getItem(CONTACTS_STORAGE_KEY)) ?? [];
+const initialContacts = { data: [], isLoading: false, error: null };
+
+const handlePending = state => {
+  state.isLoading = true;
+};
+const handleRejected = (state, action) => {
+  state.isLoading = false;
+  state.error = action.payload;
+};
 
 const contactsSlice = createSlice({
   name: 'contacts',
   initialState: initialContacts,
-  reducers: {
-    addContact: {
-      reducer(state, action) {
-        state.push(action.payload);
-        localStorage.setItem(CONTACTS_STORAGE_KEY, JSON.stringify([...state]));
-      },
-      prepare(name, number) {
-        return {
-          payload: {
-            name,
-            number,
-            id: nanoid(),
-          },
-        };
-      },
+  extraReducers: {
+    [fetchContacts.pending]: handlePending,
+    [fetchContacts.rejected]: handleRejected,
+    [fetchContacts.fulfilled](state, action) {
+      state.isLoading = false;
+      state.error = null;
+      state.data = action.payload;
     },
-
-    deleteContact(state, action) {
-      const index = state.findIndex(contact => contact.id === action.payload);
-      state.splice(index, 1);
-      localStorage.setItem(CONTACTS_STORAGE_KEY, JSON.stringify([...state]));
+    [addContact.pending]: handlePending,
+    [addContact.rejected]: handleRejected,
+    [addContact.fulfilled](state, action) {
+      state.isLoading = false;
+      state.error = null;
+      state.data.unshift(action.payload);
+    },
+    [deleteContact.pending]: handlePending,
+    [deleteContact.rejected]: handleRejected,
+    [deleteContact.fulfilled](state, action) {
+      state.isLoading = false;
+      state.error = null;
+      const index = state.data.findIndex(
+        contact => contact.id === action.payload.id
+      );
+      state.data.splice(index, 1);
     },
   },
 });
 
-export const { addContact, deleteContact } = contactsSlice.actions;
 export const contactsReduser = contactsSlice.reducer;

@@ -1,11 +1,11 @@
 import css from '../ContactForm/ContactForm.module.css';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
-import { addContact } from 'redux/contactsSlice';
+import { addContact } from 'redux/operations';
 
 export const ContactForm = () => {
   const dispatch = useDispatch();
-  const contacts = useSelector(state => state.contacts);
+  const contacts = useSelector(state => state.contacts.data);
 
   const handleSubmit = e => {
     e.preventDefault();
@@ -17,9 +17,9 @@ export const ContactForm = () => {
     if (isAlreadyExist) {
       window.alert(`Contact ${isAlreadyExist.name} already exists`);
     } else {
-      dispatch(
-        addContact(e.target.elements.name.value, e.target.elements.number.value)
-      );
+      const name = e.target.elements.name.value;
+      const phone = e.target.elements.number.value;
+      dispatch(addContact({ name, phone }));
       e.target.reset();
     }
   };
